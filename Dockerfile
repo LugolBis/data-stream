@@ -1,4 +1,4 @@
-#  Stage 1 : Builder
+# Stage 1 : Builder
 FROM eclipse-temurin:21-jdk-jammy AS builder
 
 ARG SBT_VERSION=1.10.6
@@ -12,26 +12,33 @@ RUN apt-get update && \
 
 WORKDIR /build
 
-COPY build.sbt ./
+COPY build.sbt            ./
 COPY project/build.properties project/
 COPY project/plugins.sbt  project/
-
 RUN sbt update
 
 COPY src/ src/
 
-RUN sbt assembly
+RUN sbt assembly && \
+    find target -name "*.jar" \
+    ! -name "*javadoc*" \
+    ! -name "*sources*" \
+    ! -name "*original*" \
+    -ls
 
-#  Stage 2 : Runtime
+RUN find /build/target -name "data-stream.jar" -exec cp {} /build/app.jar \; && \
+    test -f /build/app.jar || \
+    (echo "ERROR: data-stream.jar doesn't exist" && exit 1)
+
+
+# Stage 2 : Runtime
 FROM eclipse-temurin:21-jre-alpine AS runtime
 
-# Limit user privileges
-RUN addgroup -S appgroup && \
-    adduser  -S appuser -G appgroup
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 WORKDIR /app
 
-COPY --from=builder /build/target/scala-3/data-stream.jar app.jar
+COPY --from=builder /build/app.jar app.jar
 
 RUN chown appuser:appgroup app.jar
 USER appuser
@@ -39,5 +46,6 @@ USER appuser
 ENTRYPOINT ["java", \
     "-XX:+UseContainerSupport", \
     "-XX:MaxRAMPercentage=75.0", \
-    "-cp", "app.jar", \
-    "consumer.Main"]
+    "-cp", "app.jar"]
+
+CMD ["consumer.Main"]
