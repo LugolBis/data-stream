@@ -1,4 +1,5 @@
 package consumer
 
-@main def main(): Unit =
-  println("Hello from Consumer !")
+object Main:
+  def main(args: Array[String]): Unit =
+    println("Hello from Consumer!")
