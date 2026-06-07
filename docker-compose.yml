@@ -1,0 +1,73 @@
+services:
+  kafka-broker:
+    image: apache/kafka-native:4.0.0
+    container_name: kafka-broker
+    ports:
+      - "9092:9092" # OUTSIDE : accès depuis l'hôte (kafka-cli, debug)
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+
+      # INSIDE  : port 29092, utilisé par les conteneurs producer/consumer
+      # OUTSIDE : port 9092,  utilisé depuis l'hôte (mappé via ports:)
+      # CONTROLLER : port 9093, interne KRaft, jamais exposé
+      KAFKA_LISTENERS: OUTSIDE://0.0.0.0:9092,INSIDE://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: OUTSIDE://localhost:9092,INSIDE://kafka-broker:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: OUTSIDE:PLAINTEXT,INSIDE:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-broker:9093 # nom de service, pas localhostp
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 9092 || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - pipeline-net
+    restart: unless-stopped
+
+  data-stream-producer:
+    build:
+      context: .
+      dockerfile: producer/Dockerfile
+    container_name: data-stream-producer
+    depends_on:
+      kafka-broker:
+        condition: service_healthy # attend que le healthcheck passe
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka-broker:29092 # listener INSIDE
+    networks:
+      - pipeline-net
+    restart: on-failure
+
+  data-stream-consumer:
+    build:
+      context: .
+      dockerfile: consumer/Dockerfile
+    container_name: data-stream-consumer
+    depends_on:
+      kafka-broker:
+        condition: service_healthy
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka-broker:29092
+      KAFKA_GROUP_ID: data-stream-analytics-group
+    networks:
+      - pipeline-net
+    restart: on-failure
+
+volumes:
+  kafka-data:
+
+networks:
+  pipeline-net:
+    driver: bridge

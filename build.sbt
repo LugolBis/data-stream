@@ -5,8 +5,21 @@ lazy val root = project
   .settings(
     name := "data-stream",
     version := "0.1.0-SNAPSHOT",
-
     scalaVersion := scala3Version,
 
-    libraryDependencies += "org.scalameta" %% "munit" % "1.3.2" % Test
+    libraryDependencies += "org.typelevel" %% "fs2-kafka" % "4.0.0",
+
+    assembly / assemblyJarName := "data-stream.jar",
+    assembly / test := {},
+
+    assembly / assemblyMergeStrategy := {
+      case PathList("META-INF", "MANIFEST.MF")  => MergeStrategy.discard
+      case PathList("META-INF", "services", _*) => MergeStrategy.concat
+      case PathList("META-INF", _*)             => MergeStrategy.discard
+      case "reference.conf"                     => MergeStrategy.concat
+      case "application.conf"                   => MergeStrategy.concat
+      case x                                    =>
+        val old = (assembly / assemblyMergeStrategy).value
+        old(x)
+    }
   )
