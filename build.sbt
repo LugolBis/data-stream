@@ -7,7 +7,14 @@ lazy val root = project
     version := "0.1.0-SNAPSHOT",
     scalaVersion := scala3Version,
 
-    libraryDependencies += "org.typelevel" %% "fs2-kafka" % "4.0.0",
+    libraryDependencies ++= Seq(
+      "org.scalameta" %% "munit" % "1.3.2" % Test,
+      "org.typelevel" %% "fs2-kafka" % "4.0.0",
+      "org.http4s" %% "http4s-ember-client" % "0.23.34", // client SSE
+      "org.http4s" %% "http4s-circe" % "0.23.34", // bridge http4s ↔ circe
+      "io.circe" %% "circe-generic" % "0.14.15", // décodage JSON des events Wikimedia
+      "io.circe" %% "circe-parser" % "0.14.15"
+    ),
 
     assembly / assemblyJarName := "data-stream.jar",
     assembly / test := {},
