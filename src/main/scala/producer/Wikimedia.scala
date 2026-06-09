@@ -72,7 +72,7 @@ class Wikimedia[F[_]: Async: Network](
 
   def run(): F[Unit] =
     eventStream()
-      .map(_.toString)
+      .map(dto => s"${dto.getKey()} -> ${dto.getValue()}")
       .through(utf8.encode)
       .through(stdout)
       .compile
