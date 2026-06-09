@@ -59,7 +59,7 @@ class Wikimedia[F[_]: Async: Network](
       json <- client.stream(req).flatMap(_.body.chunks.parseJsonStream)
     yield json
 
-  private def eventStream(): Stream[F, MetaData] =
+  private[producer] def eventStream(): Stream[F, MetaData] =
     Stream
       .eval(lastTimestamp.get)
       .flatMap(since =>
