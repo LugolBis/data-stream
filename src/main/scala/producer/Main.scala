@@ -16,7 +16,10 @@ import org.typelevel.jawn.fs2._
 import io.circe.generic.auto._
 import io.circe.parser.decode
 
-class Wikimedia[F[_]: Async: Network](lastTimestamp: Ref[F, Option[String]]):
+class Wikimedia[F[_]: Async: Network](
+    lastTimestamp: Ref[F, Option[String]],
+    maxRecords: Int
+):
   implicit val facade: Facade[Json] =
     io.circe.jawn.CirceSupportParser(None, false).facade
 
@@ -52,28 +55,30 @@ class Wikimedia[F[_]: Async: Network](lastTimestamp: Ref[F, Option[String]]):
       json <- client.stream(req).flatMap(_.body.chunks.parseJsonStream)
     yield json
 
-  def eventStream(): Stream[F, Json] =
+  def eventStream(): Stream[F, MetaData] =
     Stream
       .eval(lastTimestamp.get)
       .flatMap(since =>
         jsonStream(buildRequest(since))
           .filterNot(isCanary)
-          .evalTap { json =>
-            extractTimestamp(json).traverse_(ts => lastTimestamp.set(Some(ts)))
-          }
+          .mapFilter(_.as[MetaData].toOption)
+          .take(maxRecords)
+          .evalTap { data => lastTimestamp.set(Some(data.dt)) }
       )
 
   def run(): F[Unit] =
     eventStream()
-      .map(_.spaces2 + "\n")
+      .map(_.toString)
       .through(utf8.encode)
       .through(stdout)
       .compile
       .drain
 
 object Main extends IOApp:
+  val maxRecords = 10
+
   def run(args: List[String]): IO[ExitCode] =
     for
       ref <- Ref.of[IO, Option[String]](None)
-      _ <- new Wikimedia[IO](ref).run()
+      _ <- new Wikimedia[IO](ref, Main.maxRecords).run()
     yield ExitCode.Success
