@@ -23,7 +23,7 @@ import fs2.kafka._
 class Wikimedia[F[_]: Async: Network](
     lastTimestamp: Ref[F, Option[String]],
     maxRecords: Int
-):
+) extends DtoProducer[F]:
   implicit val facade: Facade[Json] =
     io.circe.jawn.CirceSupportParser(None, false).facade
 
@@ -59,7 +59,7 @@ class Wikimedia[F[_]: Async: Network](
       json <- client.stream(req).flatMap(_.body.chunks.parseJsonStream)
     yield json
 
-  private[producer] def eventStream(): Stream[F, MetaData] =
+  def eventStream(): Stream[F, Dto] =
     Stream
       .eval(lastTimestamp.get)
       .flatMap(since =>
