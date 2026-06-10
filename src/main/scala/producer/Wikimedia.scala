@@ -67,11 +67,3 @@ class Wikimedia[F[_]: Async: Network](
           .mapFilter(MetaData.fromJson)
           .evalTap { data => lastTimestamp.set(Some(data.dt)) }
       )
-
-  def run(): F[Unit] =
-    eventStream()
-      .map(dto => s"${dto.getKey()} -> ${dto.getValue()}")
-      .through(utf8.encode)
-      .through(stdout)
-      .compile
-      .drain
