@@ -65,7 +65,7 @@ class Wikimedia[F[_]: Async: Network](
       .flatMap(since =>
         jsonStream(buildRequest(since))
           .filterNot(isCanary)
-          .mapFilter(_.as[MetaData].toOption)
+          .mapFilter(MetaData.fromJson)
           .take(maxRecords)
           .evalTap { data => lastTimestamp.set(Some(data.dt)) }
       )
