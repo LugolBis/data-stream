@@ -40,7 +40,15 @@ class KafkaWr[F[_]: Async: Parallel](
               .produce(ProducerRecords.one(record))
               .flatten
               .void
+              .handleErrorWith(e =>
+                Async[F]
+                  .delay(println(s"[KafkaWr] Error produced : ${e.getMessage}"))
+              )
           )
       )
       .compile
       .drain
+      .handleErrorWith(e =>
+        Async[F].delay(println(s"[KafkaWr] Stream failed : ${e.getMessage}"))
+          *> Async[F].raiseError(e)
+      )
