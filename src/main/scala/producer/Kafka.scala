@@ -14,6 +14,7 @@ trait DtoProducer[F[_]: Async]:
   def eventStream(): Stream[F, Dto]
 
 class KafkaWr[F[_]: Async: Parallel](
+    topic: String,
     dtoProducer: DtoProducer[F],
     bootstrapServers: String
 ):
@@ -33,7 +34,7 @@ class KafkaWr[F[_]: Async: Parallel](
       .flatMap(producer =>
         dtoProducer
           .eventStream()
-          .map(dto => ProducerRecord("new-page", dto.getKey(), dto.getValue()))
+          .map(dto => ProducerRecord(topic, dto.getKey(), dto.getValue()))
           .evalMap(record =>
             producer
               .produce(ProducerRecords.one(record))
