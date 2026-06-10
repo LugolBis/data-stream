@@ -79,9 +79,13 @@ services:
   data-stream-consumer:
     <<: *data-stream
     container_name: data-stream-consumer
+    ports:
+      - "4242:4242"
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka-broker:29092
       KAFKA_GROUP_ID: data-stream-analytics-group
+    networks:
+      - pipeline-net
 
 volumes:
   kafka-data:
