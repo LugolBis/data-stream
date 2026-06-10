@@ -1,6 +1,7 @@
 package consumer
 
 import cats.effect.{ExitCode, IO, IOApp}
+import _root_.consumer.consumer.LiveBarChart
 
 object Main extends IOApp:
   def run(args: List[String]): IO[ExitCode] =
@@ -11,7 +12,7 @@ object Main extends IOApp:
 
     for _ <- new KafkaRdr[IO](
         "new-page",
-        new Console[IO],
+        new LiveBarChart("4242"),
         bootstrapServers
       ).run()
     yield ExitCode.Success
