@@ -1,5 +1,6 @@
 package producer
 
+import admin.Admin
 import cats.effect.Async
 import cats.Parallel
 import fs2.io.net.Network
@@ -9,16 +10,17 @@ import cats.syntax.all._
 import io.circe.syntax._
 import fs2.kafka._
 import fs2.kafka.consumer.KafkaConsumeChunk.CommitNow
+import scala.concurrent.duration.DurationInt
 
 trait DtoProducer[F[_]: Async]:
   def eventStream(): Stream[F, Dto]
 
 class KafkaWr[F[_]: Async: Parallel](
     topic: String,
+    topicSizeLimit: Option[Double],
     dtoProducer: DtoProducer[F],
     bootstrapServers: String
 ):
-
   private val valueSerializer: Serializer[F, Dto] =
     Serializer[F, String].contramap(_.toJson.toString)
 
@@ -32,7 +34,7 @@ class KafkaWr[F[_]: Async: Parallel](
     KafkaProducer
       .stream(producerSettings)
       .flatMap(producer =>
-        dtoProducer
+        val stream = dtoProducer
           .eventStream()
           .map(dto => ProducerRecord(topic, dto.getKey(), dto.getValue()))
           .evalMap(record =>
@@ -45,6 +47,17 @@ class KafkaWr[F[_]: Async: Parallel](
                   .delay(println(s"[KafkaWr] Error produced : ${e.getMessage}"))
               )
           )
+
+        topicSizeLimit match
+          case None      => stream
+          case Some(lim) =>
+            stream.interruptWhen(
+              Stream
+                .fixedDelay[F](2.seconds)
+                .evalMap(_ =>
+                  Admin[F](bootstrapServers).topicSizeGb(topic).map(_ >= lim)
+                )
+            )
       )
       .compile
       .drain
