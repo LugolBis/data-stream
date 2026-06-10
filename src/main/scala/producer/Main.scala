@@ -4,14 +4,15 @@ import cats.effect.{ExitCode, IO, IOApp, Ref}
 import admin.Admin
 
 object Main extends IOApp:
-  val maxRecords = 10
+  val topicSizeLimit: Option[Double] = Some(5d)
 
   def run(args: List[String]): IO[ExitCode] =
     for
       ref <- Ref.of[IO, Option[String]](Some("2026-01-01T00:00:00.00Z"))
       _ <- new KafkaWr[IO](
         "new-page",
-        new Wikimedia[IO](ref, Main.maxRecords),
+        topicSizeLimit,
+        new Wikimedia[IO](ref),
         "kafka-broker:29092"
       ).run()
       size <- Admin[IO]("kafka-broker:29092").topicSizeGb("new-page")
