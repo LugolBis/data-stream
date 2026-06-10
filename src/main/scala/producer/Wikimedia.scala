@@ -21,8 +21,7 @@ import cats.effect._
 import fs2.kafka._
 
 class Wikimedia[F[_]: Async: Network](
-    lastTimestamp: Ref[F, Option[String]],
-    maxRecords: Int
+    lastTimestamp: Ref[F, Option[String]]
 ) extends DtoProducer[F]:
   implicit val facade: Facade[Json] =
     io.circe.jawn.CirceSupportParser(None, false).facade
@@ -66,7 +65,6 @@ class Wikimedia[F[_]: Async: Network](
         jsonStream(buildRequest(since))
           .filterNot(isCanary)
           .mapFilter(MetaData.fromJson)
-          .take(maxRecords)
           .evalTap { data => lastTimestamp.set(Some(data.dt)) }
       )
 
