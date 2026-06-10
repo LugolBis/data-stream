@@ -12,3 +12,34 @@ import fs2.kafka.consumer.KafkaConsumeChunk.CommitNow
 
 trait DtoProducer[F[_]: Async]:
   def eventStream(): Stream[F, Dto]
+
+class KafkaWr[F[_]: Async: Parallel](
+    dtoProducer: DtoProducer[F],
+    bootstrapServers: String
+):
+
+  private val valueSerializer: Serializer[F, Dto] =
+    Serializer[F, String].contramap(_.toJson.toString)
+
+  private val producerSettings: ProducerSettings[F, String, Dto] =
+    ProducerSettings[F, String, Dto](
+      keySerializer = Serializer[F, String],
+      valueSerializer = valueSerializer
+    ).withBootstrapServers(bootstrapServers)
+
+  def run(): F[Unit] =
+    KafkaProducer
+      .stream(producerSettings)
+      .flatMap(producer =>
+        dtoProducer
+          .eventStream()
+          .map(dto => ProducerRecord("new-page", dto.getKey(), dto.getValue()))
+          .evalMap(record =>
+            producer
+              .produce(ProducerRecords.one(record))
+              .flatten
+              .void
+          )
+      )
+      .compile
+      .drain
