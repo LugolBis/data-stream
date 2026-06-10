@@ -26,6 +26,7 @@ class KafkaRdr[F[_]: Async: Parallel](
       valueDeserializer = Deserializer[F, String]
     ).withAutoOffsetReset(AutoOffsetReset.Earliest)
       .withBootstrapServers(bootstrapServers)
+      .withGroupId("group")
 
   def run(): F[Unit] =
     dtoConsumer.processRecords(
