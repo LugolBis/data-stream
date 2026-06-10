@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kafka Live Bar Chart</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    header {
+      width: 100%;
+      max-width: 920px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+    }
+
+    #status {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .85rem;
+      opacity: .75;
+    }
+
+    #dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ef4444;
+      transition: background .4s, box-shadow .4s;
+    }
+
+    #dot.live {
+      background: #22c55e;
+      box-shadow: 0 0 8px #22c55e99;
+    }
+
+    .card {
+      background: #1a1d27;
+      border: 1px solid #2d3148;
+      border-radius: 14px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 920px;
+    }
+
+    #stats {
+      display: flex;
+      gap: 2.5rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .stat .val {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #818cf8;
+      line-height: 1;
+    }
+
+    .stat .lbl {
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      opacity: .45;
+      margin-top: .3rem;
+    }
+
+    canvas {
+      width: 100% !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>&#128202; Kafka Live Bar Chart</h1>
+    <div id="status">
+      <div id="dot"></div>
+      <span id="status-text">Connecting&#8230;</span>
+    </div>
+  </header>
+
+  <div class="card">
+    <div id="stats">
+      <div class="stat">
+        <div class="val" id="n-cats">0</div>
+        <div class="lbl">Categories</div>
+      </div>
+      <div class="stat">
+        <div class="val" id="n-msgs">0</div>
+        <div class="lbl">Messages recv.</div>
+      </div>
+      <div class="stat">
+        <div class="val" id="max-v">&#8212;</div>
+        <div class="lbl">Max value</div>
+      </div>
+    </div>
+    <canvas id="chart"></canvas>
+  </div>
+
+  <script>
+    var msgCount = 0;
+
+    var chart = new Chart(
+      document.getElementById('chart').getContext('2d'),
+      {
+        type: 'bar',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Value',
+            data: [],
+            backgroundColor: 'rgba(129,140,248,.72)',
+            borderColor: 'rgba(129,140,248,1)',
+            borderWidth: 1,
+            borderRadius: 5,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          animation: { duration: 200 },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function (c) { return '  ' + c.parsed.x; }
+              }
+            }
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              grid: { color: 'rgba(255,255,255,.06)' },
+              ticks: { color: '#94a3b8' }
+            },
+            y: {
+              grid: { display: false },
+              ticks: { color: '#e2e8f0', font: { size: 13 } }
+            }
+          }
+        }
+      }
+    );
+
+    function refresh(payload) {
+      var labels = payload.labels;
+      var values = payload.values;
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = values;
+      chart.update('active');
+      msgCount++;
+      document.getElementById('n-cats').textContent = labels.length;
+      document.getElementById('n-msgs').textContent = msgCount;
+      document.getElementById('max-v').textContent =
+        values.length ? Math.max.apply(null, values) : '\u2014';
+    }
+
+    function connect() {
+      var dot = document.getElementById('dot');
+      var txt = document.getElementById('status-text');
+      var ws = new WebSocket('ws://' + location.host + '/ws');
+
+      ws.onopen = function () {
+        dot.className = 'live';
+        txt.textContent = 'Live';
+      };
+
+      ws.onmessage = function (event) {
+        refresh(JSON.parse(event.data));
+      };
+
+      ws.onclose = function () {
+        dot.className = '';
+        txt.textContent = 'Reconnecting\u2026';
+        setTimeout(connect, 2000);
+      };
+    }
+
+    connect();
+  </script>
+</body>
+
+</html>
