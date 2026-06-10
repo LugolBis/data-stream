@@ -23,8 +23,8 @@ extension (t: (String, String))
       Json.fromValues(List(Json.fromString(t._1), Json.fromString(t._2)))
 
 case class MetaData(uri: String, domain: String, dt: String) extends Dto:
-  def getKey(): String = uri
-  def getValue(): Dto = (domain, dt).toDto()
+  def getKey(): String = dt
+  def getValue(): Dto = (uri, domain).toDto()
   def toJson: Json =
     Json.fromFields(
       Map(
