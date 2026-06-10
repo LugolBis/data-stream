@@ -66,8 +66,6 @@ services:
       DYNAMIC_CONFIG_ENABLED: 'true'
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker:29092
-    volumes:
-      - ~/.kafka-ui/config.yml:/etc/kafkaui/dynamic_config.yaml
     networks:
       - pipeline-net
 
