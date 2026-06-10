@@ -17,6 +17,7 @@ import org.http4s.websocket.WebSocketFrame
 import java.awt.Desktop
 import java.net.URI
 import io.circe.Json
+import io.circe.parser.parse
 import scala.io.Source
 
 class LiveBarChart[F[_]: Async](serverPort: String) extends DtoConsumer[F]:
@@ -39,16 +40,14 @@ class LiveBarChart[F[_]: Async](serverPort: String) extends DtoConsumer[F]:
     stream
       .map(_.record)
       .evalMap { record =>
-        val key = Json.fromString(record.value).asArray match
-          case Some(vec) =>
-            vec.headOption
-              .flatMap(domain =>
-                domain.asString.flatMap(
-                  _.split(".").collectFirst(_.toUpperCase())
-                )
-              )
-              .getOrElse("Unknown")
-          case None => "Empty"
+        val key =
+          parse(record.value).toOption
+            .flatMap(_.asArray)
+            .flatMap(_.headOption)
+            .flatMap(_.asString)
+            .flatMap(_.split('.').headOption)
+            .map(_.toUpperCase)
+            .getOrElse("Unknown")
         stateRef
           .updateAndGet(map => map.updated(key, map.getOrElse(key, 0) + 1))
           .flatMap(updateTopic.publish1)
@@ -110,4 +109,4 @@ class LiveBarChart[F[_]: Async](serverPort: String) extends DtoConsumer[F]:
       .replace("\r", "\\r")
       .replace("\t", "\\t")
 
-  private val htmlPage: String = Source.fromResource("template.html").mkString
+  private val htmlPage: String = Source.fromResource("index.html").mkString
