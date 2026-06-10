@@ -54,6 +54,23 @@ services:
       - pipeline-net
     restart: unless-stopped
 
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      kafka-broker:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker:29092
+    volumes:
+      - ~/.kafka-ui/config.yml:/etc/kafkaui/dynamic_config.yaml
+    networks:
+      - pipeline-net
+
   data-stream-producer:
     <<: *data-stream
     container_name: data-stream-producer
