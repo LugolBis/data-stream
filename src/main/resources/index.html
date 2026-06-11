@@ -5,8 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Kafka Live Bar Chart</title>
+  <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-  <style src="css/style.css"></style>
 </head>
 
 <body>
@@ -17,12 +17,6 @@
       <span id="status-text">Demo</span>
     </div>
   </header>
-
-  <!--  Demo notice  -->
-  <div class="demo-banner">
-    &#9432;&nbsp; Mode démo — données simulées, mise à jour toutes les 2 s.
-    Dans l'app réelle, les données arrivent via WebSocket depuis le consumer Kafka.
-  </div>
 
   <div class="stats-card">
     <div class="stat">
@@ -55,7 +49,7 @@
         <button class="btn-clear" id="excl-clear" onclick="clearFilter('excl')" style="display:none">Clear</button>
       </div>
       <div class="section-label">Exclude the domain</div>
-      <input type="text" id="excl-search" class="search-input" placeholder="Rechercher une catégorie…" />
+      <input type="text" id="excl-search" class="search-input" placeholder="Search a domain" />
       <div class="search-results" id="excl-results"></div>
     </div>
   </div>
@@ -76,7 +70,7 @@
         <button class="btn-clear" id="incl-clear" onclick="clearFilter('incl')" style="display:none">Clear</button>
       </div>
       <div class="section-label">Include the domain</div>
-      <input type="text" id="incl-search" class="search-input" placeholder="Rechercher une catégorie…" />
+      <input type="text" id="incl-search" class="search-input" placeholder="Search a domain" />
       <div class="search-results" id="incl-results"></div>
     </div>
   </div>
@@ -89,7 +83,7 @@
       <span class="panel-badge badge-neutral" id="badge-cats" style="display:none"></span>
     </div>
     <div class="panel-body" id="body-panel-cats" style="display:none">
-      <input type="text" id="cats-search" class="search-input" placeholder="Filtrer la liste…"
+      <input type="text" id="cats-search" class="search-input" placeholder="Filter the domain list"
         oninput="renderCategoryList()" />
       <div class="cat-list" id="cat-list"></div>
     </div>
@@ -99,7 +93,7 @@
   <div class="panel" id="panel-chart">
     <div class="panel-header" onclick="togglePanel('panel-chart')">
       <span class="caret" id="caret-panel-chart">&#9660;</span>
-      <span class="panel-title">&#128202; Graphique</span>
+      <span class="panel-title">&#128202; Bar plot</span>
       <span class="chart-info" id="chart-info"></span>
     </div>
     <div class="panel-body" id="body-panel-chart">

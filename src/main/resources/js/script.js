@@ -62,7 +62,7 @@ function updateChart() {
     chart.update('active');
     var total = allData.labels.length, shown = f.labels.length;
     document.getElementById('chart-info').textContent =
-        total > 0 ? (shown < total ? shown + ' / ' + total + ' catégories' : total + ' catégories') : '';
+        total > 0 ? (shown < total ? shown + ' / ' + total + ' domains' : total + ' domains') : '';
 }
 
 //  Data refresh (called by WS) 
@@ -107,9 +107,9 @@ function renderCategoryList() {
         var row = document.createElement('div'); row.className = 'cat-row';
         var nm = document.createElement('span'); nm.className = 'cat-name'; nm.textContent = label; nm.title = label;
         var vl = document.createElement('span'); vl.className = 'cat-val'; vl.textContent = value;
-        var bE = document.createElement('button'); bE.className = 'btn-xs btn-excl-xs'; bE.textContent = '− Exclure';
+        var bE = document.createElement('button'); bE.className = 'btn-xs btn-excl-xs'; bE.textContent = '− Exclude';
         bE.dataset.cat = label; bE.onclick = function () { addToFilter('excl', this.dataset.cat); };
-        var bI = document.createElement('button'); bI.className = 'btn-xs btn-incl-xs'; bI.textContent = '+ Inclure';
+        var bI = document.createElement('button'); bI.className = 'btn-xs btn-incl-xs'; bI.textContent = '+ Include';
         bI.dataset.cat = label; bI.onclick = function () { addToFilter('incl', this.dataset.cat); };
         row.appendChild(nm); row.appendChild(vl); row.appendChild(bE); row.appendChild(bI);
         container.appendChild(row);
@@ -135,12 +135,12 @@ function renderSearchResults(type, query) {
     });
     if (matches.length === 0) {
         var noRes = document.createElement('span'); noRes.className = 'no-results';
-        noRes.textContent = 'Aucun résultat'; container.appendChild(noRes); return;
+        noRes.textContent = 'No result'; container.appendChild(noRes); return;
     }
     matches.slice(0, 20).forEach(function (cat) {
         var chip = document.createElement('div'); chip.className = 'result-chip';
         var sp = document.createElement('span'); sp.textContent = cat; sp.title = cat;
-        var btn = document.createElement('button'); btn.textContent = '+'; btn.title = 'Ajouter au filtre';
+        var btn = document.createElement('button'); btn.textContent = '+'; btn.title = 'Add a filter';
         btn.dataset.cat = cat; btn.dataset.type = type;
         btn.onclick = function () { addToFilter(this.dataset.type, this.dataset.cat); };
         chip.appendChild(sp); chip.appendChild(btn);
@@ -171,15 +171,15 @@ function renderChips(type) {
     if (set.size === 0) {
         var hint = document.createElement('span'); hint.className = 'empty-hint';
         hint.textContent = type === 'excl'
-            ? 'Aucune catégorie exclue'
-            : 'Aucune catégorie incluse — tout est affiché';
+            ? 'There is not domains excluded'
+            : 'There is not domains included — all of them are displayed';
         container.appendChild(hint);
         clearBtn.style.display = 'none'; badge.style.display = 'none'; return;
     }
     set.forEach(function (cat) {
         var chip = document.createElement('div'); chip.className = 'chip chip-' + type;
         var sp = document.createElement('span'); sp.textContent = cat; sp.title = cat;
-        var btn = document.createElement('button'); btn.className = 'chip-rm'; btn.textContent = '×'; btn.title = 'Retirer';
+        var btn = document.createElement('button'); btn.className = 'chip-rm'; btn.textContent = '×'; btn.title = 'Delete';
         btn.dataset.cat = cat; btn.dataset.type = type;
         btn.onclick = function () { removeFromFilter(this.dataset.type, this.dataset.cat); };
         chip.appendChild(sp); chip.appendChild(btn);
@@ -218,5 +218,4 @@ function connect() {
     };
 }
 
-//  Démarrage de la connexion WebSocket
 connect();
