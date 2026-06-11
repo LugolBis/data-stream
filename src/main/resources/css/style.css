@@ -8,6 +8,7 @@
 
 body {
     font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 1.5rem;
     background: #0f1117;
     color: #e2e8f0;
     min-height: 100vh;
@@ -35,7 +36,7 @@ h1 {
     display: flex;
     align-items: center;
     gap: .5rem;
-    font-size: .85rem;
+    font-size: 1.3rem;
     opacity: .75;
 }
 
@@ -72,7 +73,7 @@ h1 {
 }
 
 .stat .lbl {
-    font-size: .72rem;
+    font-size: 1.2rem;
     text-transform: uppercase;
     letter-spacing: .08em;
     opacity: .45;
@@ -103,7 +104,7 @@ h1 {
 }
 
 .caret {
-    font-size: .6rem;
+    font-size: 1rem;
     color: #64748b;
     display: inline-block;
     transition: transform .2s;
@@ -115,14 +116,14 @@ h1 {
 }
 
 .panel-title {
-    font-size: .92rem;
+    font-size: 1.1rem;
     font-weight: 600;
     flex: 1;
 }
 
 .panel-badge {
     border-radius: 99px;
-    font-size: .7rem;
+    font-size: 1rem;
     font-weight: 700;
     padding: .1rem .55rem;
     min-width: 1.5rem;
@@ -149,7 +150,7 @@ h1 {
 }
 
 .section-label {
-    font-size: .7rem;
+    font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: .08em;
     opacity: .4;
@@ -173,7 +174,7 @@ h1 {
     gap: .3rem;
     border-radius: 99px;
     padding: .25rem .7rem;
-    font-size: .8rem;
+    font-size: 1.1rem;
     max-width: 220px;
 }
 
@@ -212,7 +213,7 @@ h1 {
 }
 
 .empty-hint {
-    font-size: .8rem;
+    font-size: 1.1rem;
     color: #475569;
     font-style: italic;
     padding-top: .1rem;
@@ -230,7 +231,7 @@ h1 {
     border-radius: 6px;
     color: #64748b;
     cursor: pointer;
-    font-size: .75rem;
+    font-size: 1.1rem;
     padding: .2rem .65rem;
 }
 
@@ -246,7 +247,7 @@ h1 {
     border-radius: 8px;
     color: #e2e8f0;
     padding: .5rem .85rem;
-    font-size: .875rem;
+    font-size: 1.15rem;
     outline: none;
 }
 
@@ -274,7 +275,7 @@ h1 {
     border: 1px solid rgba(255, 255, 255, .1);
     border-radius: 99px;
     padding: .2rem .45rem .2rem .7rem;
-    font-size: .8rem;
+    font-size: 1.1rem;
     color: #cbd5e1;
     max-width: 220px;
 }
@@ -291,7 +292,7 @@ h1 {
     border-radius: 99px;
     color: #a5b4fc;
     cursor: pointer;
-    font-size: .7rem;
+    font-size: 1rem;
     font-weight: 700;
     padding: .1rem .35rem;
     flex-shrink: 0;
@@ -302,7 +303,7 @@ h1 {
 }
 
 .no-results {
-    font-size: .8rem;
+    font-size: 1.1rem;
     color: #475569;
     font-style: italic;
     margin-top: .35rem;
@@ -329,7 +330,7 @@ h1 {
 
 .cat-row {
     display: flex;
-    align-items: center;
+    align-items: left;
     padding: .3rem 0;
     border-bottom: 1px solid rgba(255, 255, 255, .04);
     gap: .5rem;
@@ -341,25 +342,25 @@ h1 {
 
 .cat-name {
     flex: 1;
-    font-size: .875rem;
+    font-size: 1rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .cat-val {
-    font-size: .8rem;
+    font-size: 1rem;
     color: #818cf8;
     font-weight: 600;
     min-width: 52px;
-    text-align: right;
+    text-align: center;
 }
 
 .btn-xs {
     border: none;
     border-radius: 6px;
     padding: .2rem .55rem;
-    font-size: .72rem;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
@@ -385,7 +386,7 @@ h1 {
 }
 
 .chart-info {
-    font-size: .78rem;
+    font-size: 1rem;
     opacity: .4;
     margin-left: auto;
     margin-right: .5rem;
@@ -402,9 +403,13 @@ canvas {
     border: 1px solid rgba(129, 140, 248, .25);
     border-radius: 10px;
     padding: .6rem 1.25rem;
-    font-size: .8rem;
+    font-size: 1.2rem;
     color: #a5b4fc;
     display: flex;
     align-items: center;
     gap: .6rem;
+}
+
+.title {
+    font-size: larger;
 }
