@@ -49,6 +49,19 @@ flowchart TB
   style Dashboard fill:#feca1f,stroke:#ffffff,color:#ffffff,stroke-width:1px
 ```
 
+## Getting started
+```bash
+git clone https://github.com/LugolBis/data-stream.git && cd data-stream
+docker compose up -d --build
+```
+
+## Usage
+### Dashboard :
+Easily access a dynamic live dashboard that consumes real-time data directly in your web browser at `localhost:4242/`.
+
+### Kafka Monitoring :
+Easily access the [Kafka UI](https://github.com/provectus/kafka-ui) in your web browser at `localhost:8080/`.
+
 ## Features
 
 - **Data Ingestion**
