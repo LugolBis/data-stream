@@ -77,6 +77,8 @@ services:
     command: [ "producer.Main" ]
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka-broker:29092
+      PRODUCER_TOPIC_SIZE_LIMIT: 5
+      PRODUCER_TOPIC_START_TIMESTAMP: 2026-01-01T00:00:00.00Z
 
   data-stream-consumer:
     <<: *data-stream
