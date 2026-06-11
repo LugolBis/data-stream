@@ -107,11 +107,8 @@ function renderCategoryList() {
         var row = document.createElement('div'); row.className = 'cat-row';
         var nm = document.createElement('span'); nm.className = 'cat-name'; nm.textContent = label; nm.title = label;
         var vl = document.createElement('span'); vl.className = 'cat-val'; vl.textContent = value;
-        var bE = document.createElement('button'); bE.className = 'btn-xs btn-excl-xs'; bE.textContent = '− Exclude';
-        bE.dataset.cat = label; bE.onclick = function () { addToFilter('excl', this.dataset.cat); };
-        var bI = document.createElement('button'); bI.className = 'btn-xs btn-incl-xs'; bI.textContent = '+ Include';
-        bI.dataset.cat = label; bI.onclick = function () { addToFilter('incl', this.dataset.cat); };
-        row.appendChild(nm); row.appendChild(vl); row.appendChild(bE); row.appendChild(bI);
+        row.appendChild(nm);
+        row.appendChild(vl);
         container.appendChild(row);
     }
     var badge = document.getElementById('badge-cats');
@@ -187,14 +184,6 @@ function renderChips(type) {
     });
     clearBtn.style.display = ''; badge.textContent = set.size; badge.style.display = '';
 }
-
-//  Search input listeners 
-document.getElementById('excl-search').addEventListener('input', function () {
-    renderSearchResults('excl', this.value.toLowerCase());
-});
-document.getElementById('incl-search').addEventListener('input', function () {
-    renderSearchResults('incl', this.value.toLowerCase());
-});
 
 //  WebSocket connection
 function connect() {

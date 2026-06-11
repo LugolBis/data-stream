@@ -33,45 +33,15 @@
     </div>
   </div>
 
-  <!--  Exclusion filter  -->
-  <div class="panel" id="panel-excl">
-    <div class="panel-header" onclick="togglePanel('panel-excl')">
-      <span class="caret" id="caret-panel-excl">&#9660;</span>
-      <span class="panel-title">&#128683; Exclusion Filter</span>
-      <span class="panel-badge badge-excl" id="badge-excl" style="display:none"></span>
+  <!--  Chart  -->
+  <div class="panel" id="panel-chart">
+    <div class="panel-header" onclick="togglePanel('panel-chart')">
+      <span class="caret" id="caret-panel-chart">&#9660;</span>
+      <span class="panel-title">&#128202; Bar plot</span>
+      <span class="chart-info" id="chart-info"></span>
     </div>
-    <div class="panel-body" id="body-panel-excl">
-      <div class="section-label">Domains excluded</div>
-      <div class="chips-wrap" id="excl-chips">
-        <span class="empty-hint">No domain excluded</span>
-      </div>
-      <div class="filter-footer">
-        <button class="btn-clear" id="excl-clear" onclick="clearFilter('excl')" style="display:none">Clear</button>
-      </div>
-      <div class="section-label">Exclude the domain</div>
-      <input type="text" id="excl-search" class="search-input" placeholder="Search a domain" />
-      <div class="search-results" id="excl-results"></div>
-    </div>
-  </div>
-
-  <!--  Inclusion filter  -->
-  <div class="panel" id="panel-incl">
-    <div class="panel-header" onclick="togglePanel('panel-incl')">
-      <span class="caret" id="caret-panel-incl">&#9660;</span>
-      <span class="panel-title">&#9989; Inclusion filter</span>
-      <span class="panel-badge badge-incl" id="badge-incl" style="display:none"></span>
-    </div>
-    <div class="panel-body" id="body-panel-incl">
-      <div class="section-label">Included domains</div>
-      <div class="chips-wrap" id="incl-chips">
-        <span class="empty-hint">No domain included — all domains are displayed</span>
-      </div>
-      <div class="filter-footer">
-        <button class="btn-clear" id="incl-clear" onclick="clearFilter('incl')" style="display:none">Clear</button>
-      </div>
-      <div class="section-label">Include the domain</div>
-      <input type="text" id="incl-search" class="search-input" placeholder="Search a domain" />
-      <div class="search-results" id="incl-results"></div>
+    <div class="panel-body" id="body-panel-chart">
+      <canvas id="chart"></canvas>
     </div>
   </div>
 
@@ -89,17 +59,6 @@
     </div>
   </div>
 
-  <!--  Chart  -->
-  <div class="panel" id="panel-chart">
-    <div class="panel-header" onclick="togglePanel('panel-chart')">
-      <span class="caret" id="caret-panel-chart">&#9660;</span>
-      <span class="panel-title">&#128202; Bar plot</span>
-      <span class="chart-info" id="chart-info"></span>
-    </div>
-    <div class="panel-body" id="body-panel-chart">
-      <canvas id="chart"></canvas>
-    </div>
-  </div>
   <script src="js/script.js"></script>
 </body>
 
