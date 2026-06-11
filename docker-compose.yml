@@ -25,8 +25,10 @@ services:
     depends_on:
       kafka-init:
         condition: service_completed_successfully
-    ports:
-      - "9092:9092"
+    expose:
+      - "9092"
+      - "29092"
+      - "9093"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
