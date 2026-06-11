@@ -1,7 +1,7 @@
 package consumer
 
 import cats.effect.{ExitCode, IO, IOApp}
-import _root_.consumer.consumer.LiveBarChart
+import _root_.consumer.LiveBarChart
 
 object Main extends IOApp:
   def run(args: List[String]): IO[ExitCode] =

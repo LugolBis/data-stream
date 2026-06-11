@@ -1,7 +1,5 @@
 package consumer
 
-package consumer
-
 import cats.effect.{Async, Ref}
 import cats.syntax.all.*
 import com.comcast.ip4s.*
@@ -14,6 +12,7 @@ import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.headers.`Content-Type`
 import org.http4s.server.websocket.WebSocketBuilder2
 import org.http4s.websocket.WebSocketFrame
+import org.http4s.StaticFile
 import java.awt.Desktop
 import java.net.URI
 import io.circe.Json
@@ -70,6 +69,17 @@ class LiveBarChart[F[_]: Async](serverPort: String) extends DtoConsumer[F]:
           Ok(htmlPage).map(
             _.withContentType(`Content-Type`(MediaType.text.html))
           )
+
+        case req @ GET -> "css" /: file =>
+          StaticFile
+            .fromResource(s"/css/$file", Some(req))
+            .getOrElseF(NotFound())
+
+        case req @ GET -> "js" /: file =>
+          StaticFile
+            .fromResource(s"/js/$file", Some(req))
+            .getOrElseF(NotFound())
+
         // WebSocket :
         case GET -> Root / "ws" =>
           for
