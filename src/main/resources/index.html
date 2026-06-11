@@ -6,208 +6,107 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Kafka Live Bar Chart</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-  <style>
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: #0f1117;
-      color: #e2e8f0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-    }
-
-    header {
-      width: 100%;
-      max-width: 920px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-    }
-
-    h1 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      letter-spacing: .02em;
-    }
-
-    #status {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-      font-size: .85rem;
-      opacity: .75;
-    }
-
-    #dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #ef4444;
-      transition: background .4s, box-shadow .4s;
-    }
-
-    #dot.live {
-      background: #22c55e;
-      box-shadow: 0 0 8px #22c55e99;
-    }
-
-    .card {
-      background: #1a1d27;
-      border: 1px solid #2d3148;
-      border-radius: 14px;
-      padding: 2rem;
-      width: 100%;
-      max-width: 920px;
-    }
-
-    #stats {
-      display: flex;
-      gap: 2.5rem;
-      margin-bottom: 1.75rem;
-    }
-
-    .stat .val {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: #818cf8;
-      line-height: 1;
-    }
-
-    .stat .lbl {
-      font-size: .72rem;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      opacity: .45;
-      margin-top: .3rem;
-    }
-
-    canvas {
-      width: 100% !important;
-    }
-  </style>
+  <style src="css/style.css"></style>
 </head>
 
 <body>
-
   <header>
     <h1>&#128202; Kafka Live Bar Chart</h1>
     <div id="status">
-      <div id="dot"></div>
-      <span id="status-text">Connecting&#8230;</span>
+      <div id="dot" class="live"></div>
+      <span id="status-text">Demo</span>
     </div>
   </header>
 
-  <div class="card">
-    <div id="stats">
-      <div class="stat">
-        <div class="val" id="n-cats">0</div>
-        <div class="lbl">Categories</div>
-      </div>
-      <div class="stat">
-        <div class="val" id="n-msgs">0</div>
-        <div class="lbl">Messages recv.</div>
-      </div>
-      <div class="stat">
-        <div class="val" id="max-v">&#8212;</div>
-        <div class="lbl">Max value</div>
-      </div>
-    </div>
-    <canvas id="chart"></canvas>
+  <!--  Demo notice  -->
+  <div class="demo-banner">
+    &#9432;&nbsp; Mode démo — données simulées, mise à jour toutes les 2 s.
+    Dans l'app réelle, les données arrivent via WebSocket depuis le consumer Kafka.
   </div>
 
-  <script>
-    var msgCount = 0;
+  <div class="stats-card">
+    <div class="stat">
+      <div class="val" id="n-cats">0</div>
+      <div class="lbl">Domains</div>
+    </div>
+    <div class="stat">
+      <div class="val" id="n-msgs">0</div>
+      <div class="lbl">Messages received</div>
+    </div>
+    <div class="stat">
+      <div class="val" id="max-v">—</div>
+      <div class="lbl">Max value</div>
+    </div>
+  </div>
 
-    var chart = new Chart(
-      document.getElementById('chart').getContext('2d'),
-      {
-        type: 'bar',
-        data: {
-          labels: [],
-          datasets: [{
-            label: 'Value',
-            data: [],
-            backgroundColor: 'rgba(129,140,248,.72)',
-            borderColor: 'rgba(129,140,248,1)',
-            borderWidth: 1,
-            borderRadius: 5,
-            borderSkipped: false
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          animation: { duration: 200 },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: function (c) { return '  ' + c.parsed.x; }
-              }
-            }
-          },
-          scales: {
-            x: {
-              beginAtZero: true,
-              grid: { color: 'rgba(255,255,255,.06)' },
-              ticks: { color: '#94a3b8' }
-            },
-            y: {
-              grid: { display: false },
-              ticks: { color: '#e2e8f0', font: { size: 13 } }
-            }
-          }
-        }
-      }
-    );
+  <!--  Exclusion filter  -->
+  <div class="panel" id="panel-excl">
+    <div class="panel-header" onclick="togglePanel('panel-excl')">
+      <span class="caret" id="caret-panel-excl">&#9660;</span>
+      <span class="panel-title">&#128683; Exclusion Filter</span>
+      <span class="panel-badge badge-excl" id="badge-excl" style="display:none"></span>
+    </div>
+    <div class="panel-body" id="body-panel-excl">
+      <div class="section-label">Domains excluded</div>
+      <div class="chips-wrap" id="excl-chips">
+        <span class="empty-hint">No domain excluded</span>
+      </div>
+      <div class="filter-footer">
+        <button class="btn-clear" id="excl-clear" onclick="clearFilter('excl')" style="display:none">Clear</button>
+      </div>
+      <div class="section-label">Exclude the domain</div>
+      <input type="text" id="excl-search" class="search-input" placeholder="Rechercher une catégorie…" />
+      <div class="search-results" id="excl-results"></div>
+    </div>
+  </div>
 
-    function refresh(payload) {
-      var labels = payload.labels;
-      var values = payload.values;
-      chart.data.labels = labels;
-      chart.data.datasets[0].data = values;
-      chart.update('active');
-      msgCount++;
-      document.getElementById('n-cats').textContent = labels.length;
-      document.getElementById('n-msgs').textContent = msgCount;
-      document.getElementById('max-v').textContent =
-        values.length ? Math.max.apply(null, values) : '\u2014';
-    }
+  <!--  Inclusion filter  -->
+  <div class="panel" id="panel-incl">
+    <div class="panel-header" onclick="togglePanel('panel-incl')">
+      <span class="caret" id="caret-panel-incl">&#9660;</span>
+      <span class="panel-title">&#9989; Inclusion filter</span>
+      <span class="panel-badge badge-incl" id="badge-incl" style="display:none"></span>
+    </div>
+    <div class="panel-body" id="body-panel-incl">
+      <div class="section-label">Included domains</div>
+      <div class="chips-wrap" id="incl-chips">
+        <span class="empty-hint">No domain included — all domains are displayed</span>
+      </div>
+      <div class="filter-footer">
+        <button class="btn-clear" id="incl-clear" onclick="clearFilter('incl')" style="display:none">Clear</button>
+      </div>
+      <div class="section-label">Include the domain</div>
+      <input type="text" id="incl-search" class="search-input" placeholder="Rechercher une catégorie…" />
+      <div class="search-results" id="incl-results"></div>
+    </div>
+  </div>
 
-    function connect() {
-      var dot = document.getElementById('dot');
-      var txt = document.getElementById('status-text');
-      var ws = new WebSocket('ws://' + location.host + '/ws');
+  <!--  Category list (collapsed by default)  -->
+  <div class="panel collapsed" id="panel-cats">
+    <div class="panel-header" onclick="togglePanel('panel-cats')">
+      <span class="caret" id="caret-panel-cats">&#9660;</span>
+      <span class="panel-title">&#128203; All domains</span>
+      <span class="panel-badge badge-neutral" id="badge-cats" style="display:none"></span>
+    </div>
+    <div class="panel-body" id="body-panel-cats" style="display:none">
+      <input type="text" id="cats-search" class="search-input" placeholder="Filtrer la liste…"
+        oninput="renderCategoryList()" />
+      <div class="cat-list" id="cat-list"></div>
+    </div>
+  </div>
 
-      ws.onopen = function () {
-        dot.className = 'live';
-        txt.textContent = 'Live';
-      };
-
-      ws.onmessage = function (event) {
-        refresh(JSON.parse(event.data));
-      };
-
-      ws.onclose = function () {
-        dot.className = '';
-        txt.textContent = 'Reconnecting\u2026';
-        setTimeout(connect, 2000);
-      };
-    }
-
-    connect();
-  </script>
+  <!--  Chart  -->
+  <div class="panel" id="panel-chart">
+    <div class="panel-header" onclick="togglePanel('panel-chart')">
+      <span class="caret" id="caret-panel-chart">&#9660;</span>
+      <span class="panel-title">&#128202; Graphique</span>
+      <span class="chart-info" id="chart-info"></span>
+    </div>
+    <div class="panel-body" id="body-panel-chart">
+      <canvas id="chart"></canvas>
+    </div>
+  </div>
+  <script src="js/script.js"></script>
 </body>
 
 </html>
